@@ -20,4 +20,16 @@
 
 namespace TheOnemanCompany.OneFileBlog
 {
+    using Nancy;
+
+    public class BlogModule : NancyModule
+    {
+        public BlogModule() : base("/blog")
+        {
+            Get["/"] = parameters =>
+            {
+                return "Hello! World? Are you here?";
+            };
+        }
+    }
 }
