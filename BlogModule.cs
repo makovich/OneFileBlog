@@ -20,7 +20,12 @@
 
 namespace TheOnemanCompany.OneFileBlog
 {
+    using System.IO;
+    using System.Text;
     using Nancy;
+    using CfgMgr = System.Configuration.ConfigurationManager;
+
+    #region Blog Module
 
     public class BlogModule : NancyModule
     {
@@ -28,8 +33,48 @@ namespace TheOnemanCompany.OneFileBlog
         {
             Get["/"] = parameters =>
             {
-                return "Hello! World? Are you here?";
+                return "Hello! World? Are you here?" + Cfg.WhatDoIHave();
             };
         }
     }
+
+    #endregion
+
+    #region Blog Configuration
+
+    internal static class Cfg
+    {
+        public static readonly string PathToBlogRecords = CfgMgr.AppSettings["PathToBlogRecords"];
+        public static readonly string PathToImages =      Path.Combine(PathToBlogRecords, CfgMgr.AppSettings["ImagesDirectory"]);
+        public static readonly string PathToIndexFile =   Path.Combine(PathToBlogRecords, "index.md");
+        public static readonly string BlogTocTitle =      CfgMgr.AppSettings["BlogTocTitle"];
+        public static readonly string BootswatchTheme =   CfgMgr.AppSettings["BootswatchTheme"];
+        public static readonly string DisqusShortname =   CfgMgr.AppSettings["DisqusShortname"];
+
+        public static string WhatDoIHave()
+        {
+            var result = new StringBuilder().AppendLine("<hr /><b>web.config : configuration/appSettings</b><br />");
+
+            foreach (var field in typeof(Cfg).GetFields())
+            {
+                result.AppendLine("{0}: <i>{1}</i><br />".FormatWith(field.Name, field.GetValue(null)));
+            }
+
+            return result.ToString();
+        }
+    }
+
+    #endregion
+
+    #region Utilites
+
+    internal static class StringExtensions
+    {
+        public static string FormatWith(this string value, params object[] args)
+        {
+            return string.Format(value, args);
+        }
+    }
+
+    #endregion
 }
