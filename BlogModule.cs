@@ -21,8 +21,11 @@
 namespace TheOnemanCompany.OneFileBlog
 {
     using System.IO;
+    using System.Linq;
     using System.Text;
+    using System.Text.RegularExpressions;
     using Nancy;
+    using Nancy.Responses;
     using CfgMgr = System.Configuration.ConfigurationManager;
 
     #region Blog Module
@@ -31,11 +34,78 @@ namespace TheOnemanCompany.OneFileBlog
     {
         public BlogModule() : base("/blog")
         {
+            Before += context =>
+            {
+                var requestPath = context.Request.Path.Split('/').Last();
+
+                if (requestPath.EndsWithAny(".png", ".gif", ".jpg"))
+                {
+                    var imageFilePath = Path.Combine(Cfg.PathToImages, requestPath);
+
+                    return new GenericFileResponse(imageFilePath);
+                }
+
+                return null;
+            };
+
             Get["/"] = parameters =>
             {
-                return "Hello! World? Are you here?" + Cfg.WhatDoIHave();
+                return new BlogRecordResponse(Cfg.PathToIndexFile, Cfg.BlogTocTitle);
+            };
+
+            Get["/{record}"] = parameters =>
+            {
+                var blogRecordFilePath = Path.Combine(Cfg.PathToBlogRecords, parameters.record + ".md");
+
+                return new BlogRecordResponse(blogRecordFilePath, parameters.record);
             };
         }
+
+        #region BlogRecordResponse
+
+        private class BlogRecordResponse : GenericFileResponse
+        {
+            public BlogRecordResponse(string recordFilePath, string title)
+                : base(recordFilePath)
+            {
+                if (StatusCode == HttpStatusCode.OK)
+                {
+                    EnrichContentWithTitle(title);
+                }
+            }
+
+            private void EnrichContentWithTitle(string title)
+            {
+                var titleText = title.Contains("-")
+                    ? title.FromHyphensToSentense()
+                    : title.FromPascalCaseToSentence();
+
+                var wrappedTitle = "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><title>{0} - {1}</title>"
+                    .FormatWith(Cfg.BlogTocTitle, titleText);
+
+                RewriteContent(wrappedTitle);
+            }
+
+            private void RewriteContent(string addend)
+            {
+                using (var buffer = new MemoryStream())
+                using (var reader = new StreamReader(buffer))
+                {
+                    Contents.Invoke(buffer);
+                    buffer.Position = 0;
+
+                    var responseContent = reader.ReadToEnd().Insert(0, addend);
+
+                    ContentType = "text/html";
+                    Contents = stream =>
+                    {
+                        stream.Write(Encoding.Default.GetBytes(responseContent), 0, responseContent.Length);
+                    };
+                }
+            }
+        }
+
+        #endregion
     }
 
     #endregion
@@ -73,6 +143,29 @@ namespace TheOnemanCompany.OneFileBlog
         public static string FormatWith(this string value, params object[] args)
         {
             return string.Format(value, args);
+        }
+
+        public static string FromPascalCaseToSentence(this string value)
+        {
+            return Regex.Replace(value, "[a-z][A-Z]", m => m.Value[0] + " " + char.ToLower(m.Value[1]));
+        }
+
+        public static string FromHyphensToSentense(this string value)
+        {
+            return value.Substring(0, 1).ToUpper() + value.Replace('-', ' ').Substring(1);
+        }
+
+        public static bool EndsWithAny(this string value, params string[] patterns)
+        {
+            foreach (var item in patterns)
+            {
+                if (value.EndsWith(item))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
