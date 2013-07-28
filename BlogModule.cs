@@ -22,6 +22,7 @@ namespace TheOnemanCompany.OneFileBlog
 {
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
     using System.Text.RegularExpressions;
     using Nancy;
@@ -50,7 +51,7 @@ namespace TheOnemanCompany.OneFileBlog
 
             Get["/"] = parameters =>
             {
-                return new BlogRecordResponse(Cfg.PathToIndexFile, Cfg.BlogTocTitle);
+                return new BlogRecordResponse(Cfg.PathToIndexFile, "All posts goes here", false);
             };
 
             Get["/{record}"] = parameters =>
@@ -65,12 +66,13 @@ namespace TheOnemanCompany.OneFileBlog
 
         private class BlogRecordResponse : GenericFileResponse
         {
-            public BlogRecordResponse(string recordFilePath, string title)
+            public BlogRecordResponse(string recordFilePath, string title, bool allowDisqus = true)
                 : base(recordFilePath)
             {
                 if (StatusCode == HttpStatusCode.OK)
                 {
                     EnrichContentWithTitle(title);
+                    EnrichContentWithJavaScript(allowDisqus);
                 }
             }
 
@@ -84,6 +86,33 @@ namespace TheOnemanCompany.OneFileBlog
                     .FormatWith(Cfg.BlogTocTitle, titleText);
 
                 RewriteContent(wrappedTitle);
+            }
+
+            private void EnrichContentWithJavaScript(bool allowDisqus)
+            {
+                var scriptText = allowDisqus && Cfg.DisqusShortname.NotEmpty()
+                    ? ReadJavaScriptFromResources("strapdown-loader-disqus.js").Replace("{{DISQUS_SHORTNAME_MARKER}}", Cfg.DisqusShortname)
+                    : ReadJavaScriptFromResources("strapdown-loader.js");
+
+                if (scriptText.IsNullOrWhiteSpace())
+                    return;
+
+                var wrappedScript = "<script type=\"text/javascript\" theme=\"{1}\">{0}</script>"
+                    .FormatWith(scriptText, Cfg.BootswatchTheme);
+
+                RewriteContent(wrappedScript);
+            }
+
+            private string ReadJavaScriptFromResources(string filename)
+            {
+                var currentAssembly = Assembly.GetExecutingAssembly();
+                var resourceUri = currentAssembly.GetManifestResourceNames().First(x => x.EndsWith(filename));
+
+                using (var stream = currentAssembly.GetManifestResourceStream(resourceUri))
+                using (var reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
+                }
             }
 
             private void RewriteContent(string addend)
@@ -166,6 +195,16 @@ namespace TheOnemanCompany.OneFileBlog
             }
 
             return false;
+        }
+
+        public static bool IsNullOrWhiteSpace(this string value)
+        {
+            return string.IsNullOrWhiteSpace(value);
+        }
+
+        public static bool NotEmpty(this string value)
+        {
+            return !value.IsNullOrWhiteSpace();
         }
     }
 

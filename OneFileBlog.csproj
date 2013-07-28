@@ -61,6 +61,8 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="strapdown\strapdown-loader-disqus.js" />
+    <EmbeddedResource Include="strapdown\strapdown-loader.js" />
     <Content Include="web.config">
       <SubType>Designer</SubType>
     </Content>
