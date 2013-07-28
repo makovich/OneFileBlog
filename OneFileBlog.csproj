@@ -41,8 +41,35 @@
   <ItemGroup>
     <Compile Include="BlogModule.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
+    <Content Include="records\how-this-stuff-really-works.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="records\images\01-create-aspnet-empty-app.png" />
+    <Content Include="records\images\02-add-assembly-info.png" />
+    <Content Include="records\images\03-enable-nuget-package-restore.png" />
+    <Content Include="records\images\04-before-cleanup.png" />
+    <Content Include="records\images\05-unload-project.png" />
+    <Content Include="records\images\06-edit-csproj.png" />
+    <Content Include="records\images\07-remove-properties-folder.png" />
+    <Content Include="records\images\08-reload-project.png" />
+    <Content Include="records\images\09-rename-assembly-info.png" />
+    <Content Include="records\images\10-one-file-for-a-blog.png" />
+    <Content Include="records\images\11-after-cleanup.png" />
+    <Content Include="records\images\12-get-nancy.png" />
+    <Content Include="records\images\13-hello-nancy-module.png" />
+    <Content Include="records\images\14-its-working.png" />
+    <Content Include="records\images\15-add-application-settings.png" />
+    <Content Include="records\images\16-configuration-manager.png" />
+    <Content Include="records\images\17-file-organization.png" />
+    <Content Include="records\images\18-configuration-done.png" />
+    <Content Include="records\images\19-prepend-title-for-blog-record.png" />
+    <Content Include="records\images\20-it-works.png" />
+    <Content Include="records\images\21-images-are-so-beautiful.png" />
+    <Content Include="records\images\22-embedding-strapdown.png" />
+    <Content Include="records\images\23-embedding-strapdown-again.png" />
+    <Content Include="records\images\24-to-disqus-or-not-to-disqus.png" />
+    <Content Include="records\images\25-strapdown-magic.png" />
     <Content Include="records\images\borscht.jpg" />
     <Content Include="records\index.md" />
   </ItemGroup>
