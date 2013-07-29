@@ -1,5 +1,5 @@
 # Blog in a single *.cs file?
-Take a look on how it possible at [onefileblog.apphb.com/blog/how-this-stuff-really-works](onefileblog.apphb.com/blog/how-this-stuff-really-works).
+Look how it is possible at [onefileblog.apphb.com/blog/how-this-stuff-really-works](http://onefileblog.apphb.com/blog/how-this-stuff-really-works).
 
 One file blog is a blog engine which magic is impossible without some awesome projects:
 
